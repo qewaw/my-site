@@ -8,6 +8,7 @@
   :root {
     --bg: #f5f4ee; --fg: #141413; --muted: #6b6a64;
     --accent: #d97757; --line: #e3e1d8;
+    --ease: cubic-bezier(.22, .61, .36, 1);
   }
   @media (prefers-color-scheme: dark) {
     :root { --bg: #1f1e1d; --fg: #f0eee6; --muted: #a09e95; --accent: #e08a6b; --line: #33312e; }
@@ -24,25 +25,25 @@
     display: flex; align-items: center; gap: 10px; padding: 14px 24px;
     background: color-mix(in srgb, var(--bg) 85%, transparent);
     backdrop-filter: blur(8px);
+    animation: fade 1s var(--ease) both;
   }
   header svg { width: 24px; height: 24px; color: var(--accent); }
   header span { font-family: Georgia, "Times New Roman", serif; font-size: 20px; }
 
-  /* Сцена с анимированным логотипом */
-  .stage { height: 320vh; position: relative; }
-  .sticky {
-    position: sticky; top: 0; height: 100vh; overflow: hidden;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    text-align: center; padding: 0 24px;
+  /* Первый экран */
+  .hero {
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center; padding: 80px 24px 40px;
   }
-  #logo { width: 120px; height: 120px; color: var(--accent); will-change: transform; }
-  #intro { margin-top: 36px; will-change: opacity; }
-  h1 {
+  .hero > * { animation: rise 1.1s var(--ease) both; }
+  .hero svg { width: 96px; height: 96px; color: var(--accent); }
+  .hero h1 {
     font-family: Georgia, "Times New Roman", serif; font-weight: 400;
-    font-size: clamp(34px, 7vw, 60px); line-height: 1.15;
+    font-size: clamp(34px, 7vw, 60px); line-height: 1.15; margin-top: 32px;
+    animation-delay: .15s;
   }
-  #intro p { color: var(--muted); margin-top: 12px; font-size: 18px; }
-  .hint { margin-top: 28px; font-size: 14px; color: var(--muted); }
+  .hero p { color: var(--muted); margin-top: 12px; font-size: 18px; animation-delay: .3s; }
+  .hint { margin-top: 28px; font-size: 14px; color: var(--muted); animation-delay: .5s; }
 
   /* Контент */
   main { max-width: 640px; margin: 0 auto; padding: 0 24px 80px; }
@@ -61,12 +62,24 @@
   footer { text-align: center; padding: 32px 24px 48px; color: var(--muted); font-size: 14px; }
   footer a { color: var(--accent); text-decoration: none; }
 
-  .reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s ease, transform .7s ease; }
-  .reveal.in { opacity: 1; transform: none; }
+  /* Плавное появление текста: по очереди, с лёгким сдвигом и размытием */
+  .reveal h2, .reveal p, .reveal li {
+    opacity: 0; transform: translateY(22px); filter: blur(5px);
+    transition: opacity 1s var(--ease), transform 1s var(--ease), filter 1s var(--ease);
+    transition-delay: calc(var(--i, 0) * 130ms);
+  }
+  .reveal.in h2, .reveal.in p, .reveal.in li { opacity: 1; transform: none; filter: none; }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(24px); filter: blur(6px); }
+    to   { opacity: 1; transform: none; filter: none; }
+  }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
-    .reveal { opacity: 1; transform: none; transition: none; }
+    .hero > *, header { animation: none; }
+    .reveal h2, .reveal p, .reveal li { opacity: 1; transform: none; filter: none; transition: none; }
   }
 </style>
 </head>
@@ -74,20 +87,21 @@
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
+    <!-- Упрощённая «искра»: 12 неравных лучей из одного центра -->
     <symbol id="spark" viewBox="0 0 100 100">
-      <g stroke="currentColor" stroke-width="7" stroke-linecap="round">
-        <line x1="50" y1="6"  x2="50" y2="40"/>
-        <line x1="50" y1="15" x2="50" y2="40" transform="rotate(30 50 50)"/>
-        <line x1="50" y1="9"  x2="50" y2="40" transform="rotate(60 50 50)"/>
-        <line x1="50" y1="17" x2="50" y2="40" transform="rotate(90 50 50)"/>
-        <line x1="50" y1="6"  x2="50" y2="40" transform="rotate(120 50 50)"/>
-        <line x1="50" y1="13" x2="50" y2="40" transform="rotate(150 50 50)"/>
-        <line x1="50" y1="8"  x2="50" y2="40" transform="rotate(180 50 50)"/>
-        <line x1="50" y1="16" x2="50" y2="40" transform="rotate(210 50 50)"/>
-        <line x1="50" y1="6"  x2="50" y2="40" transform="rotate(240 50 50)"/>
-        <line x1="50" y1="14" x2="50" y2="40" transform="rotate(270 50 50)"/>
-        <line x1="50" y1="10" x2="50" y2="40" transform="rotate(300 50 50)"/>
-        <line x1="50" y1="12" x2="50" y2="40" transform="rotate(330 50 50)"/>
+      <g stroke="currentColor" stroke-width="8.5" stroke-linecap="round">
+        <line x1="50" y1="50" x2="50" y2="3"  transform="rotate(0 50 50)"/>
+        <line x1="50" y1="50" x2="50" y2="17" transform="rotate(31 50 50)"/>
+        <line x1="50" y1="50" x2="50" y2="8"  transform="rotate(55 50 50)"/>
+        <line x1="50" y1="50" x2="50" y2="14" transform="rotate(87 50 50)"/>
+        <line x1="50" y1="50" x2="50" y2="4"  transform="rotate(121 50 50)"/>
+        <line x1="50" y1="50" x2="50" y2="19" transform="rotate(148 50 50)"/>
+        <line x1="50" y1="50" x2="50" y2="5"  transform="rotate(181 50 50)"/>
+        <line x1="50" y1="50" x2="50" y2="13" transform="rotate(207 50 50)"/>
+        <line x1="50" y1="50" x2="50" y2="7"  transform="rotate(243 50 50)"/>
+        <line x1="50" y1="50" x2="50" y2="17" transform="rotate(269 50 50)"/>
+        <line x1="50" y1="50" x2="50" y2="3"  transform="rotate(301 50 50)"/>
+        <line x1="50" y1="50" x2="50" y2="12" transform="rotate(331 50 50)"/>
       </g>
     </symbol>
   </defs>
@@ -98,15 +112,11 @@
   <span>Claude</span>
 </header>
 
-<div class="stage">
-  <div class="sticky">
-    <svg id="logo" viewBox="0 0 100 100" aria-label="Логотип"><use href="#spark"/></svg>
-    <div id="intro">
-      <h1>Привет, я Claude</h1>
-      <p>ИИ-ассистент от Anthropic</p>
-      <div class="hint">Листай вниз ↓</div>
-    </div>
-  </div>
+<div class="hero">
+  <svg viewBox="0 0 100 100" aria-label="Логотип"><use href="#spark"/></svg>
+  <h1>Привет, я Claude</h1>
+  <p>ИИ-ассистент от Anthropic</p>
+  <div class="hint">Листай вниз ↓</div>
 </div>
 
 <main>
@@ -137,31 +147,16 @@
 </footer>
 
 <script>
-  const stage = document.querySelector('.stage');
-  const logo = document.getElementById('logo');
-  const intro = document.getElementById('intro');
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Задержка для каждого элемента внутри блока, чтобы текст появлялся по очереди
+  document.querySelectorAll('.reveal').forEach(sec => {
+    sec.querySelectorAll('h2, p, li').forEach((el, i) => el.style.setProperty('--i', i));
+  });
 
-  // Прогресс p: 0 → 1 по мере прокрутки сцены.
-  // Логотип растёт до середины (p = 0.5), затем уменьшается обратно.
-  function update() {
-    const total = stage.offsetHeight - innerHeight;
-    const p = Math.min(1, Math.max(0, -stage.getBoundingClientRect().top / total));
-    const s = Math.sin(Math.PI * p);
-    logo.style.transform = `scale(${1 + 2.2 * s}) rotate(${p * 120}deg)`;
-    intro.style.opacity = 1 - Math.min(1, s * 1.6);
-  }
-
-  if (!reduce) {
-    addEventListener('scroll', update, { passive: true });
-    addEventListener('resize', update);
-    update();
-  }
-
-  // Плавное появление блоков
   const io = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
-  }, { threshold: 0.15 });
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.2 });
   document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 </script>
 </body>
